@@ -2,6 +2,7 @@ import argparse
 import os
 import platform
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -54,11 +55,21 @@ def write_path(file: Path, gcc_path: str | None) -> None:
 
 def setup(cress_files: list[str], msvc: bool) -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--native", help="Use the native toolchain of build machine", action="store_true"
+    )
     parser.add_argument("--gcc_path", help="Path of gcc-arm-none-eabi", type=str)
     opts = parser.parse_args()
 
-    write_path(Path(cress_files[0]), opts.gcc_path)
-    cross_list = [f"--cross-file={f}" for f in cress_files]
+    if os.path.exists("builddir"):
+        shutil.rmtree("builddir")
+
+    if opts.native:
+        cross_list = []
+    else:
+        write_path(Path(cress_files[0]), opts.gcc_path)
+        cross_list = [f"--cross-file={f}" for f in cress_files]
+
     cmd = "meson setup builddir".split() + cross_list
     if msvc and platform.system() == "Windows":
         cmd += ["--vsenv"]
