@@ -1,6 +1,8 @@
-/build/
-/builddir/
+/build
+/builddir
 /subprojects/*
 !/subprojects/*.wrap
 /.vscode/*
 !/.vscode/tasks.json
+/cross_files
+/__pycache__
