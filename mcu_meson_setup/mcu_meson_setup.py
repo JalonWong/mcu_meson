@@ -109,7 +109,7 @@ def download_files(cross_files: list[str]) -> list[str]:
     return rst_list
 
 
-def setup(cross_files: list[str], msvc: bool = True) -> None:
+def setup(build_dir: str, cross_files: list[str], msvc: bool = True) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--native", help="Setup for native at the same time", action="store_true")
     parser.add_argument("--arm_path", help="Path of arm toolchain", type=str)
@@ -117,19 +117,19 @@ def setup(cross_files: list[str], msvc: bool = True) -> None:
 
     # Native
     if opts.native:
-        if os.path.exists("builddir-native"):
-            shutil.rmtree("builddir-native")
-        cmd = "meson setup builddir-native".split()
+        if os.path.exists(f"{build_dir}-native"):
+            shutil.rmtree(f"{build_dir}-native")
+        cmd = f"meson setup {build_dir}-native".split()
         if msvc and platform.system() == "Windows":
             cmd += ["--vsenv"]
         print(green("Run:"), " ".join(cmd), flush=True)
         subprocess.run(cmd)
 
     # Cross
-    if os.path.exists("builddir"):
-        shutil.rmtree("builddir")
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
     cross_files = download_files(cross_files)
     write_path(Path(cross_files[0]), opts.arm_path)
-    cmd = "meson setup builddir".split() + [f"--cross-file={f}" for f in cross_files]
+    cmd = f"meson setup {build_dir}".split() + [f"--cross-file={f}" for f in cross_files]
     print(green("Run:"), " ".join(cmd), flush=True)
     subprocess.run(cmd)
