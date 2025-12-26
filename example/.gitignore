@@ -1,0 +1,8 @@
+/build
+/builddir
+/builddir-native
+/subprojects/*
+!/subprojects/*.wrap
+/.vscode/*
+!/.vscode/tasks.json
+/cross_files

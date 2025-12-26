@@ -1,13 +1,13 @@
 project('mcu_app', ['c', 'cpp'], default_options: ['default_library=static'])
 
 app = library('app',
-    'example/lib.c',
-    'example/lib.cc',
+    'src/lib.c',
+    'src/lib.cc',
 )
 
 app_dep = declare_dependency(
     link_with: app,
-    include_directories: include_directories('example'),
+    include_directories: include_directories('src'),
 )
 
 gtest = subproject('gtest').get_variable('gtest_main_dep')
