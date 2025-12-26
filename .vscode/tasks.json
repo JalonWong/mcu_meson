@@ -3,9 +3,6 @@
     "problemMatcher": [
         "$meson-gcc"
     ],
-    "options": {
-        "cwd": "builddir"
-    },
     "tasks": [
         {
             "label": "Build",
@@ -14,6 +11,9 @@
                 "compile",
                 "app"
             ],
+            "options": {
+                "cwd": "builddir"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -25,6 +25,9 @@
             "args": [
                 "test",
             ],
+            "options": {
+                "cwd": "builddir-native"
+            },
             "group": {
                 "kind": "test",
                 "isDefault": true

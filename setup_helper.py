@@ -73,24 +73,23 @@ def download_files(cross_files: list[str]) -> list[str]:
 
 def setup(cross_files: list[str], msvc: bool) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--native", help="Use the native toolchain of build machine", action="store_true"
-    )
     parser.add_argument("--gcc_path", help="Path of gcc-arm-none-eabi", type=str)
     opts = parser.parse_args()
 
-    if os.path.exists("builddir"):
-        shutil.rmtree("builddir")
-
-    if opts.native:
-        cross_list = []
-    else:
-        cross_files = download_files(cross_files)
-        write_path(Path(cross_files[0]), opts.gcc_path)
-        cross_list = [f"--cross-file={f}" for f in cross_files]
-
-    cmd = "meson setup builddir".split() + cross_list
+    # Native
+    if os.path.exists("builddir-native"):
+        shutil.rmtree("builddir-native")
+    cmd = "meson setup builddir-native".split()
     if msvc and platform.system() == "Windows":
         cmd += ["--vsenv"]
+    print(green("Run:"), " ".join(cmd), flush=True)
+    subprocess.run(cmd)
+
+    # Cross
+    if os.path.exists("builddir"):
+        shutil.rmtree("builddir")
+    cross_files = download_files(cross_files)
+    write_path(Path(cross_files[0]), opts.gcc_path)
+    cmd = "meson setup builddir".split() + [f"--cross-file={f}" for f in cross_files]
     print(green("Run:"), " ".join(cmd), flush=True)
     subprocess.run(cmd)
