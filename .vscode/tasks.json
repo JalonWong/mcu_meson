@@ -9,7 +9,8 @@
             "command": "meson",
             "args": [
                 "compile",
-                "app"
+                "app",
+                "--verbose",
             ],
             "options": {
                 "cwd": "builddir"

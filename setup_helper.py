@@ -73,17 +73,19 @@ def download_files(cross_files: list[str]) -> list[str]:
 
 def setup(cross_files: list[str], msvc: bool) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gcc_path", help="Path of gcc-arm-none-eabi", type=str)
+    parser.add_argument("--native", help="Setup for native at the same time", action="store_true")
+    parser.add_argument("--gcc_path", help="Path of arm toolchain", type=str)
     opts = parser.parse_args()
 
     # Native
-    if os.path.exists("builddir-native"):
-        shutil.rmtree("builddir-native")
-    cmd = "meson setup builddir-native".split()
-    if msvc and platform.system() == "Windows":
-        cmd += ["--vsenv"]
-    print(green("Run:"), " ".join(cmd), flush=True)
-    subprocess.run(cmd)
+    if opts.native:
+        if os.path.exists("builddir-native"):
+            shutil.rmtree("builddir-native")
+        cmd = "meson setup builddir-native".split()
+        if msvc and platform.system() == "Windows":
+            cmd += ["--vsenv"]
+        print(green("Run:"), " ".join(cmd), flush=True)
+        subprocess.run(cmd)
 
     # Cross
     if os.path.exists("builddir"):
