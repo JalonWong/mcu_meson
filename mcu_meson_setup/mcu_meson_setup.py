@@ -49,7 +49,7 @@ def find_path2(cmd: str) -> Path | None:
         p = Path(P)
         cmd_p = p.joinpath(cmd)
         if cmd_p.exists():
-            print(green("Found:"), cmd_p, flush=True)
+            # print(green("Found:"), cmd_p, flush=True)
             return p
 
     return None
@@ -75,7 +75,7 @@ def write_path(file: Path, arm_path: str | None) -> None:
     rst = subprocess.run(
         [path.joinpath(arm_cmd), "--version"], text=True, capture_output=True, check=True
     )
-    print(rst.stdout, flush=True)
+    # print(rst.stdout, flush=True)
 
     text = file.read_text()
     if arm_cmd == "arm-none-eabi-gcc":
