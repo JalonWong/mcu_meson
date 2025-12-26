@@ -4,6 +4,7 @@ import platform
 import re
 import shutil
 import subprocess
+import urllib.request
 from pathlib import Path
 
 
@@ -53,7 +54,24 @@ def write_path(file: Path, gcc_path: str | None) -> None:
     file.write_text(text)
 
 
-def setup(cress_files: list[str], msvc: bool) -> None:
+def download_files(cross_files: list[str]) -> list[str]:
+    path = Path("cross_files")
+    if not path.exists():
+        os.mkdir(path)
+
+    rst_list = []
+    for f in cross_files:
+        if f.startswith("http"):
+            filename = path.joinpath(f.rsplit("/", maxsplit=1)[1])
+            urllib.request.urlretrieve(f, filename)
+            rst_list.append(str(filename))
+        else:
+            rst_list.append(f)
+
+    return rst_list
+
+
+def setup(cross_files: list[str], msvc: bool) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--native", help="Use the native toolchain of build machine", action="store_true"
@@ -67,8 +85,9 @@ def setup(cress_files: list[str], msvc: bool) -> None:
     if opts.native:
         cross_list = []
     else:
-        write_path(Path(cress_files[0]), opts.gcc_path)
-        cross_list = [f"--cross-file={f}" for f in cress_files]
+        cross_files = download_files(cross_files)
+        write_path(Path(cross_files[0]), opts.gcc_path)
+        cross_list = [f"--cross-file={f}" for f in cross_files]
 
     cmd = "meson setup builddir".split() + cross_list
     if msvc and platform.system() == "Windows":

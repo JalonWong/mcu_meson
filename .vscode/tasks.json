@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "problemMatcher": [
+        "$meson-gcc"
+    ],
+    "options": {
+        "cwd": "builddir"
+    },
+    "tasks": [
+        {
+            "label": "Build",
+            "command": "meson",
+            "args": [
+                "compile",
+                "app"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "label": "Test",
+            "command": "meson",
+            "args": [
+                "test",
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+        }
+    ]
+}
