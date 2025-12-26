@@ -38,6 +38,23 @@ def find_path(cmd: str) -> str | None:
     return None
 
 
+def find_path2(cmd: str) -> Path | None:
+    if platform.system() == "Windows":
+        PATH = os.environ["PATH"].split(";")
+        cmd += ".exe"
+    else:
+        PATH = os.environ["PATH"].split(":")
+
+    for P in PATH:
+        p = Path(P)
+        cmd_p = p.joinpath(cmd)
+        if cmd_p.exists():
+            print(green("Found:"), cmd_p, flush=True)
+            return p
+
+    return None
+
+
 def write_path(file: Path, arm_path: str | None) -> None:
     if str(file).endswith("gcc-arm-none-eabi.ini"):
         arm_cmd = "arm-none-eabi-gcc"
@@ -45,17 +62,33 @@ def write_path(file: Path, arm_path: str | None) -> None:
         arm_cmd = "armclang"
 
     if arm_path:
-        p = Path(arm_path)
-        if p.name != "bin":
-            p = p.joinpath("bin")
-        path = p.as_posix()[:-3]
+        path = Path(arm_path)
+        if path.name != "bin":
+            path = path.joinpath("bin")
     else:
-        tmp = find_path(arm_cmd)
+        tmp = find_path2(arm_cmd)
         if tmp is None:
+            print(red("Can not find:"), arm_cmd, flush=True)
             exit(1)
         path = tmp
 
-    text = re.sub(r"cross_toolchain = '[\S]+'", f"cross_toolchain = '{path}'", file.read_text())
+    rst = subprocess.run(
+        [path.joinpath(arm_cmd), "--version"], text=True, capture_output=True, check=True
+    )
+    print(rst.stdout, flush=True)
+
+    text = file.read_text()
+    if arm_cmd == "arm-none-eabi-gcc":
+        ver = re.search(r"\) ([\d\.]+) ", rst.stdout)
+        if ver and int(ver.group(1).split(".")[0]) >= 12:
+            text = text.replace(
+                "base_c_link_args2 = []",
+                "base_c_link_args2 = ['-Wl,-no-warn-rwx-segments']",
+                count=1,
+            )
+
+    path_str = path.parent.as_posix()
+    text = re.sub(r"cross_toolchain = '[^']+'", f"cross_toolchain = '{path_str}'", text, count=1)
     file.write_text(text)
 
 
