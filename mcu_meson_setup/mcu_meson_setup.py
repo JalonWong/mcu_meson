@@ -69,16 +69,19 @@ def modify_cross_file(file: Path, link_script: str, output_map: str, arm_path: s
         ver = re.search(r"\) ([\d\.]+) ", rst.stdout)
         if ver and int(ver.group(1).split(".")[0]) >= 12:
             additional_c_link_args.append("-Wl,-no-warn-rwx-segments")
-
         if link_script:
             additional_c_link_args.append(f"-T../{link_script}")
-
         if output_map:
             additional_c_link_args.append(f"-Wl,-Map={output_map},--cref")
+    else:
+        if link_script:
+            additional_c_link_args.append(f"--scatter=../{link_script}")
+        if output_map:
+            additional_c_link_args += "--info summarysizes --map --load_addr_map_info --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers --list".split()
+            additional_c_link_args.append(output_map)
 
     if len(additional_c_link_args) > 0:
         args_str = "','".join(additional_c_link_args)
-        print(args_str)
         text = re.sub(
             r"additional_c_link_args = \[[^\[]*\]",
             f"additional_c_link_args = ['{args_str}']",
