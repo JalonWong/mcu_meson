@@ -15,4 +15,12 @@ setup(
 #     link_script="src/my_link.ld",
 #     output_map="app.map",
 # )
-# setup("builddir", ["../armclang.ini", "../clang-cortex-m3.ini"])
+# setup(
+#     "builddir",
+#     [
+#         "https://raw.githubusercontent.com/JalonWong/mcu_meson/refs/heads/main/armclang.ini",
+#         "https://raw.githubusercontent.com/JalonWong/mcu_meson/refs/heads/main/clang-cortex-m3.ini",
+#     ],
+#     link_script="src/my_link.sct",
+#     output_map="app.map",
+# )

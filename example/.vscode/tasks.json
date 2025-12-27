@@ -10,7 +10,7 @@
             "args": [
                 "compile",
                 "app",
-                "--verbose",
+                // "--verbose",
             ],
             "options": {
                 "cwd": "builddir"

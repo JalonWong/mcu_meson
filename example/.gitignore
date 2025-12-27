@@ -1,6 +1,5 @@
 /build
-/builddir
-/builddir-native
+/builddir*
 /subprojects/*
 !/subprojects/*.wrap
 /.vscode/*
