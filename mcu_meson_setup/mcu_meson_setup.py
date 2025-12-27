@@ -114,7 +114,7 @@ def setup(
     cross_files: list[str],
     link_script: str = "",
     output_map: str = "",
-    msvc: bool = True,
+    msvc: bool = False,
 ) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--rm", help="Remove builddir before setup", action="store_true")
