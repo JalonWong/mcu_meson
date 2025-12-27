@@ -1,6 +1,6 @@
 # Meson Cross compilation for MCUs
 
-Cross files for [Meson build system](https://mesonbuild.com).
+Cross files of gcc-arm-none-eabi and ARMClang for [Meson build system](https://mesonbuild.com).
 
 ## Usage
 1. Get python wheel from (release page)(https://github.com/JalonWong/mcu_meson/releases)
