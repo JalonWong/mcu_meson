@@ -114,13 +114,14 @@ def setup(
     msvc: bool = True,
 ) -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--rm", help="Remove builddir before setup", action="store_true")
     parser.add_argument("--native", help="Setup for native at the same time", action="store_true")
     parser.add_argument("--arm_path", help="Path of arm toolchain", type=str)
     opts = parser.parse_args()
 
     # Native
     if opts.native:
-        if os.path.exists(f"{build_dir}-native"):
+        if opts.rm and os.path.exists(f"{build_dir}-native"):
             shutil.rmtree(f"{build_dir}-native")
         cmd = f"meson setup {build_dir}-native".split()
         if msvc and platform.system() == "Windows":
@@ -129,7 +130,7 @@ def setup(
         subprocess.run(cmd)
 
     # Cross
-    if os.path.exists(build_dir):
+    if opts.rm and os.path.exists(build_dir):
         shutil.rmtree(build_dir)
     cross_files = download_files(cross_files)
     modify_cross_file(Path(cross_files[0]), link_script, output_map, opts.arm_path)
