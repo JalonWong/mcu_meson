@@ -11,3 +11,6 @@ Cross files for [Meson build system](https://mesonbuild.com).
 5. Use meson
 
 See also [example](example).
+
+## Known issues
+- Currently, armclang doesn't work. It needs this [PR](https://github.com/mesonbuild/meson/pull/15426)
