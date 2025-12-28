@@ -1,4 +1,3 @@
-/.vscode/*
-!/.vscode/tasks.json
+/.vscode
 **/__pycache__
 **/.mypy_cache

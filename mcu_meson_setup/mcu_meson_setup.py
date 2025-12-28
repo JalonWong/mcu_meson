@@ -38,10 +38,11 @@ def find_path(cmd: str) -> Path | None:
 
 
 def modify_cross_file(file: Path, link_script: str, output_map: str, arm_path: str | None) -> None:
-    if str(file).endswith("gcc-arm-none-eabi.ini"):
-        arm_cmd = "arm-none-eabi-gcc"
-    else:
+    print(green("Modifying:"), file.as_posix(), flush=True)
+    if str(file).endswith("armclang.ini"):
         arm_cmd = "armclang"
+    else:
+        arm_cmd = "arm-none-eabi-gcc"
 
     if arm_path:
         path = Path(arm_path)
@@ -92,51 +93,72 @@ def modify_cross_file(file: Path, link_script: str, output_map: str, arm_path: s
     file.write_text(text)
 
 
-def download_files(cross_files: list[str]) -> list[str]:
-    path = Path("cross_files")
-    if not path.exists():
-        os.mkdir(path)
+def download_file(url: str, file: Path) -> None:
+    print(green("Downloading:"), f"{url} -> {file.as_posix()}", flush=True)
+    urllib.request.urlretrieve(url, file)
+
+
+def prepare_cross_files(build_dir: Path, cross_files: list[str]) -> list[str]:
+    cross_dir = build_dir.joinpath("cross_files")
+    os.makedirs(cross_dir, exist_ok=True)
+
+    repo = "https://raw.githubusercontent.com/JalonWong/mcu_meson"
 
     rst_list = []
     for f in cross_files:
-        if f.startswith("http"):
-            filename = path.joinpath(f.rsplit("/", maxsplit=1)[1])
-            urllib.request.urlretrieve(f, filename)
-            rst_list.append(str(filename))
+        if f.startswith("main:"):
+            filename = cross_dir.joinpath(f.rsplit(":", maxsplit=1)[1])
+            download_file(
+                f.replace("main:", f"{repo}/refs/heads/main/"),
+                filename,
+            )
+        elif f.startswith("tag:"):
+            tag_list = f.split(":")
+            filename = cross_dir.joinpath(tag_list[2])
+            download_file(
+                f"{repo}/{tag_list[1]}/{tag_list[2]}",
+                filename,
+            )
+        elif f.startswith("http"):
+            filename = cross_dir.joinpath(f.rsplit("/", maxsplit=1)[1])
+            download_file(f, filename)
         else:
-            rst_list.append(f)
+            filename = cross_dir.joinpath(Path(f).name)
+            print(green("Copying:"), f"{f} -> {filename.as_posix()}", flush=True)
+            shutil.copy(f, filename)
+
+        rst_list.append(filename.as_posix())
 
     return rst_list
 
 
 def setup(
     build_dir: str,
-    cross_files: list[str],
+    cross_files: list[str] = [],
     link_script: str = "",
     output_map: str = "",
-    msvc: bool = False,
+    reconfigure: bool = True,
+    wipe: bool = False,
+    vsenv: bool = False,
+    args: list[str] = [],
 ) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rm", help="Remove builddir before setup", action="store_true")
-    parser.add_argument("--native", help="Setup for native at the same time", action="store_true")
     parser.add_argument("--arm_path", help="Path of arm toolchain", type=str)
-    opts = parser.parse_args()
+    opts, extra = parser.parse_known_args()
 
-    # Native
-    if opts.native:
-        if opts.rm and os.path.exists(f"{build_dir}-native"):
-            shutil.rmtree(f"{build_dir}-native")
-        cmd = f"meson setup {build_dir}-native".split()
-        if msvc and platform.system() == "Windows":
-            cmd += ["--vsenv"]
-        print(green("Run:"), " ".join(cmd), flush=True)
-        subprocess.run(cmd)
-
-    # Cross
-    if opts.rm and os.path.exists(build_dir):
+    if wipe and os.path.exists(build_dir):
+        print(green("Wipe:"), f"Removing {build_dir}", flush=True)
         shutil.rmtree(build_dir)
-    cross_files = download_files(cross_files)
-    modify_cross_file(Path(cross_files[0]), link_script, output_map, opts.arm_path)
+
+    cross_files = prepare_cross_files(Path(build_dir), cross_files)
+    if len(cross_files) > 0:
+        modify_cross_file(Path(cross_files[0]), link_script, output_map, opts.arm_path)
+
     cmd = f"meson setup {build_dir}".split() + [f"--cross-file={f}" for f in cross_files]
-    print(green("Run:"), " ".join(cmd), flush=True)
+    if reconfigure:
+        cmd += ["--reconfigure"]
+    if vsenv and platform.system() == "Windows":
+        cmd += ["--vsenv"]
+
+    print(green("Running:"), " ".join(cmd + args + extra), flush=True)
     subprocess.run(cmd)

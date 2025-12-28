@@ -1,7 +1,6 @@
-/build
+/.vscode/*
+!/.vscode/tasks.json
+
 /builddir*
 /subprojects/*
 !/subprojects/*.wrap
-/.vscode/*
-!/.vscode/tasks.json
-/cross_files
