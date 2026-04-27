@@ -17,6 +17,3 @@ Cross files for gcc-arm-none-eabi and ARMClang in the [Meson build system](https
     3. You can also pass arguments via the function `setup(args=["--debug"])`
 
 See also [example](example).
-
-## Known issues
-- Currently, armclang doesn't work. It needs this [PR](https://github.com/mesonbuild/meson/pull/15426)
